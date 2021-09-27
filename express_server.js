@@ -16,26 +16,13 @@ const urlDatabase = {
 };
 
 // HELPER FUNCTIONS
-// const generateRandomString = function (length = 6) {
-//   return Math.random().toString(20).substr(2, length)
-// };
-function generateRandomString() {
-  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
-  return;
+const generateRandomString = function() {
+  return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 };
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 
-//  GET /HOME <==> currently unused
-app.get('/home', (req, res) => { // (request, response)
-  res.send('Hello!');
-});
-
-//  GET URLDATABASE IN JSON
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
+// HOME
 // INITIATE /URLS <==> urls_index.ejs
 app.get('/urls', (req, res) => {
   // console.log(urlDatabase);
@@ -44,19 +31,36 @@ app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
-
+ 
+//NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
   res.render('urls_new')
 });
 
-// POST NEW LONG URL  <==> urls_new.ejs
+
+// CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  // console.log(req.body);
+  const longURL = req.body.longURL;
+  const shortURL = generateRandomString(longURL);
+  urlDatabase[shortURL] = longURL;
+  // console.log(urlDatabase);
+  res.redirect(`/urls/${shortURL}`);
 });
 
-//INITIATE SHORT URL <==> urls_show.ejs
+// REDIRECT TO LONG URL
+app.get("/u/:shortURL", (req, res) => {
+  // console.log(req.body);
+  // console.log(req.params);
+  const longURL = urlDatabase[req.params.shortURL];
+  // console.log(longURL);
+  res.redirect(longURL);
+}); 
+
+
+//SHOW
+//INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   // console.log(req.params);
@@ -75,13 +79,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
 
-// // DEFAULT // CATCH - ALL
+// // DEFAULT // CATCH - ALL ERRORS
 // app.get ('*', (req, res) => {
 //   res.status(404).send('Error'); // unhappy path
 // });
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 //   _.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
+
 app.listen(PORT, () => {
   console.log(`On PORT ${PORT}...`);
 });
