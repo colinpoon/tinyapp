@@ -26,10 +26,10 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// DEFAULT // CATCH - ALL
-app.get ('*', (req, res) => {
-  res.status(404).send('Error'); // unhappy path
-});
+// // DEFAULT // CATCH - ALL
+// app.get ('*', (req, res) => {
+//   res.status(404).send('Error'); // unhappy path
+// });
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 //   _.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
