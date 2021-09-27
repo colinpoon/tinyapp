@@ -13,22 +13,43 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-//  GET /HOME
+//  GET /HOME <==> currently unused
 app.get('/home', (req, res) => { // (request, response)
   res.send('Hello!');
 });
-
-// INITIATE /URLS
-app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
-});
-
 
 //  GET URLDATABASE IN JSON
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
 // });
+
+// INITIATE /URLS <==> urls_index.ejs
+app.get('/urls', (req, res) => {
+  // console.log(urlDatabase);
+  // console.log(urlDatabase.b2xVn2);
+  // console.log(urlDatabase['b2xVn2']);
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
+//INITIATE SHORT URL <==> urls_show.ejs
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  // console.log(req.params);
+  // console.log(req.params.shortURL);
+  res.render("urls_show", templateVars);
+});
+
+
+
+
+
+
+
+
+
+
+
 
 // // DEFAULT // CATCH - ALL
 // app.get ('*', (req, res) => {
