@@ -7,10 +7,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.get("/", (req, res) => { // (request, response)
+app.get("/home", (req, res) => { // (request, response)
   res.send("Hello!");
 });
 
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+///////////
 app.listen(PORT, () => {
   console.log(`On PORT ${PORT}...`);
 });
