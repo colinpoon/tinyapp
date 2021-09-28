@@ -38,7 +38,6 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new')
 });
 
-
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
 app.post("/urls", (req, res) => {
   // console.log(req.body);
@@ -56,7 +55,18 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   // console.log(longURL);
   res.redirect(longURL);
-}); 
+});
+
+// DELETE SHORT URL
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
+
+
+
+
 
 
 //SHOW
@@ -82,6 +92,10 @@ app.get("/urls/:shortURL", (req, res) => {
 // // DEFAULT // CATCH - ALL ERRORS
 // app.get ('*', (req, res) => {
 //   res.status(404).send('Error'); // unhappy path
+// });
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
 // });
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
