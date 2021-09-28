@@ -35,7 +35,7 @@ app.get('/urls', (req, res) => {
 //NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new')
+  res.render('urls_new');
 });
 
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
@@ -67,6 +67,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // EDIT URL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  // console.log(shortURL);
+  const longURL = req.body.longURL;
+  // console.log(longURL);
+  urlDatabase[req.params.shortURL] = longURL;
+  res.redirect("/urls");
 });
 
 
