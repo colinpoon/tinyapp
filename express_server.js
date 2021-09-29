@@ -48,6 +48,7 @@ const getUserByEmail = function (email) {
 };
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
+  
 
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
@@ -148,25 +149,15 @@ app.post('/register', (req, res) => {
   res.cookie("user_id", id);
   console.log("USER[ID] for new user >>------->>>", users[id]);
   console.log(users);
-  console.log('ACCESS TO COOKIES >>------->>>', req.cookies.user_id);
 
   res.redirect('/urls');
 });
 
-
-
-
-
-
-
-
-
-
-
-
 // LOGIN
 app.get('/login', (req, res) => {
-
+  const user = null;
+  const templateVars = { user };
+  res.render('urls_login', templateVars);
 });
 
 app.post('/login', (req, res) => {
@@ -182,7 +173,7 @@ app.post('/login', (req, res) => {
 // RENDER LOGOUT BUTTON IF USER
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 // // DEFAULT // CATCH - ALL ERRORS

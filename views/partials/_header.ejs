@@ -31,11 +31,9 @@
         <button type="submit" class="btn btn-light">logout</button>
       </form>
       <% } else { %>
-      <form method="POST" action="/login">
-        <input class="form-control" type="text" name="username" placeholder="username" style="width: 300px; margin-top: 1em; margin-right: 1em; display: inline;">
-        <button type="submit" class="btn btn-light">login</button><br><br>
+        <a href="/login"style="margin-right: 0.5em;"><button type="submit" class="btn btn-light">Login</button></a>
+        <a href="/register"><button type="submit" class="btn btn-light">Register</button></a>            
         <% } %>
-    </form>
     </div>
   </nav>
 </header>
