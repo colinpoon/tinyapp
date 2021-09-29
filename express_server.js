@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
@@ -9,7 +9,9 @@ const PORT = 8080;
 app.set('view engine', 'ejs');
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(express.urlencoded({extended: false}));
+app.use(cookieParser());
+
 
 //  DATABASES
 const urlDatabase = {
@@ -18,7 +20,7 @@ const urlDatabase = {
 };
 
 // HELPER FUNCTIONS
-const generateRandomString = function () {
+const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 };
 
@@ -30,7 +32,7 @@ app.get('/urls', (req, res) => {
   // console.log(urlDatabase);
   // console.log(urlDatabase.b2xVn2);
   // console.log(urlDatabase['b2xVn2']);
-  const username = req.cookies.username
+  const username = req.cookies.username;
   const templateVars = { urls: urlDatabase, username };
   res.render("urls_index", templateVars);
 });
@@ -38,7 +40,7 @@ app.get('/urls', (req, res) => {
 //NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
-  const username = req.cookies.username
+  const username = req.cookies.username;
   const templateVars = { username };
   res.render('urls_new', templateVars);
 });
@@ -82,7 +84,7 @@ app.post("/urls/:shortURL", (req, res) => {
 //SHOW
 //INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  const username = req.cookies.username
+  const username = req.cookies.username;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username};
   // console.log(req.params);
   // console.log(req.params.shortURL);
@@ -93,15 +95,15 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
-// LOGOUT 
+// LOGOUT
 // RENDER LOGOUT BUTTON IF USER
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 
 
