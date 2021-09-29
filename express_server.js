@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080;
 
@@ -8,6 +9,7 @@ const PORT = 8080;
 app.set('view engine', 'ejs');
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 //  DATABASES
 const urlDatabase = {
@@ -16,7 +18,7 @@ const urlDatabase = {
 };
 
 // HELPER FUNCTIONS
-const generateRandomString = function() {
+const generateRandomString = function () {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 };
 
@@ -28,14 +30,17 @@ app.get('/urls', (req, res) => {
   // console.log(urlDatabase);
   // console.log(urlDatabase.b2xVn2);
   // console.log(urlDatabase['b2xVn2']);
-  const templateVars = { urls: urlDatabase };
+  const username = req.cookies.username
+  const templateVars = { urls: urlDatabase, username };
   res.render("urls_index", templateVars);
 });
- 
+
 //NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const username = req.cookies.username
+  const templateVars = { username };
+  res.render('urls_new', templateVars);
 });
 
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
@@ -70,23 +75,33 @@ app.post("/urls/:shortURL", (req, res) => {
   // console.log(shortURL);
   const longURL = req.body.longURL;
   // console.log(longURL);
-  urlDatabase[req.params.shortURL] = longURL;
+  urlDatabase[shortURL] = longURL;
   res.redirect("/urls");
 });
-
-
-
 
 //SHOW
 //INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const username = req.cookies.username
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username};
   // console.log(req.params);
   // console.log(req.params.shortURL);
   res.render("urls_show", templateVars);
 });
 
+// LOGIN
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', username);
+  res.redirect('/urls')
+});
 
+// LOGOUT 
+// RENDER LOGOUT BUTTON IF USER
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls')
+})
 
 
 
