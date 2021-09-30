@@ -92,11 +92,11 @@ const urlsForUser = function(id) {
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
 app.get('/urls', (req, res) => {
-  if (!req.cookies.user_id) { /// <----- session 
+  if (!req.session.user_id) { /// <----- session 
     res.redirect("/login");
     return;
   }
-  const user = req.cookies.user_id;
+  const user = req.session.user_id;
   console.log("user_id", user);
   const templateVars = { urls: urlsForUser(user), user: users[user] };
   res.render("urls_index", templateVars);
@@ -109,7 +109,7 @@ app.get("/", (req, res) => {
 //NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   if (!id) {
     res.redirect("/login");
     return;
@@ -124,7 +124,7 @@ app.post("/urls", (req, res) => {
   // console.log('----------->',req.body);
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(longURL);
-  urlDatabase[shortURL] = { longURL: longURL, userID: req.cookies.user_id };
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
   // console.log('---------------->',urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
@@ -153,7 +153,7 @@ app.post("/urls/:shortURL", (req, res) => {
 //SHOW
 //INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   const user = users[id];
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
   res.render("urls_show", templateVars);
@@ -194,7 +194,7 @@ app.post('/register', (req, res) => {
 
 // LOGIN
 app.get('/login', (req, res) => {
-  const id = req.cookies.user_id;
+  const id = req.session.user_id;
   if (id) {
     res.redirect("/urls");
     return;
