@@ -57,17 +57,27 @@ app.get('/urls', (req, res) => {
   // console.log(urlDatabase.b2xVn2);
   // console.log(urlDatabase['b2xVn2']);
   const id = req.cookies.user_id;
-  console.log(id);
+  // console.log(id);
   const user = users[id];
   const templateVars = { urls: urlDatabase, user};
   res.render("urls_index", templateVars);
 });
 
+app.get("/", (req, res) => {
+  const user = req.cookies.user_id;
+  if (!user) {
+    res.redirect("/login");
+    return;
+  }
+  res.redirect("/urls");
+});
+
 //NEW
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
-  const username = req.cookies.username;
-  const templateVars = { username };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = { user };
   res.render('urls_new', templateVars);
 });
 
@@ -110,8 +120,9 @@ app.post("/urls/:shortURL", (req, res) => {
 //SHOW
 //INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  const username = req.cookies.username;
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
   // console.log(req.params);
   // console.log(req.params.shortURL);
   res.render("urls_show", templateVars);
@@ -133,13 +144,13 @@ app.post('/register', (req, res) => {
   // console.log(password);
   //CHECK IF INPUT FIELDS ARE BLANK
   if (!email || !password) {
-    return res.status(400).send("400: Email and password cannot be left blank.");
+    return res.status(400).send("Invalid Registration: Email or password cannot be left blank.");
   };
 
   // IS EMAIL IN USERS DATABASE
   // const user = getUserByEmail(email);
   if (getUserByEmail(email)) {
-    return res.status(400).send('400: User already exists.');
+    return res.status(400).send('Error: User already exists.');
   };
   // ADD USER TO DATABASE
   const id = Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
@@ -154,27 +165,52 @@ app.post('/register', (req, res) => {
 });
 
 // LOGIN
+//INITIATE PAGE-------------------------------------------here dealing with password authentication. Looking to see if user password matches password input. 
 app.get('/login', (req, res) => {
-  const user = null;
+  const user = req.cookies.user_id;
   const templateVars = { user };
+  if (user) {
+    return res.redirect('/urls');
+  }
   res.render('urls_login', templateVars);
 });
-
+//LOGIN
+//USER PATH
 app.post('/login', (req, res) => {
-
   const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    res.status(400).send("Invalid Login: Email or password cannot be left blank")
+    return;
+  }
   const user = getUserByEmail(email);
-
+  if(!user){
+    res.status(403).send("Error: User doesn't exist");
+  }
+  // console.log(user.password);
   res.cookie('user_id', user.id);
   res.redirect('/urls');
 });
 
+
+
+
+
+
+
 // LOGOUT
 // RENDER LOGOUT BUTTON IF USER
 app.post('/logout', (req, res) => {
+  
   res.clearCookie('user_id');
   res.redirect('/login');
 });
+
+
+
+
+
+
 
 // // DEFAULT // CATCH - ALL ERRORS
 // app.get ('*', (req, res) => {
