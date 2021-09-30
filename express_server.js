@@ -36,43 +36,16 @@ const users = {
   "a": {
     id: "a",
     email: "a@gmail.com",
-    password: "123"
+    password: "$2b$10$yMf2F18S7T0RuOjKDhkrXeUGVbndJnqdIfO0AgR/E7xNZnweEjrJG"
   },
   "b": {
     id: "b",
     email: "b@gmail.com",
-    password: "123"
+    password: "$2b$10$yMf2F18S7T0RuOjKDhkrXeUGVbndJnqdIfO0AgR/E7xNZnweEjrJG"
   }
 };
 
 // HELPER FUNCTIONS
-// const generateRandomString = function () {
-//   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-// };
-
-// // const getUserByEmail = function (email) {
-// //   for (const userID in users) {
-// //     const user = users[userID];
-// //     if (user.email === email) {
-// //       return user;
-// //     }
-// //   }
-// //   return null;
-// // };
-// // //REFACTOR
-// const getUserByEmail = function (email, database) {
-//   let user = {};
-//   for (const key in database) {
-//     if (database[key]['email'] === email) {
-//       user = database[key].id
-//       return user;
-//     }
-//   }
-//   return null;
-// };
-// console.log('got -------------->', getUserByEmail('a@gmail.com', users))
-
-
 const urlsForUser = function(id) {
   let output = {};
   for (const [key, value] of Object.entries(urlDatabase)) {
@@ -90,7 +63,7 @@ const urlsForUser = function(id) {
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
 app.get('/urls', (req, res) => {
-  if (!req.session.user_id) { /// <----- session 
+  if (!req.session.user_id) {
     res.redirect("/login");
     return;
   }
@@ -119,11 +92,9 @@ app.get('/urls/new', (req, res) => {
 
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
 app.post("/urls", (req, res) => {
-  // console.log('----------->',req.body);
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(longURL);
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
-  // console.log('---------------->',urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -135,6 +106,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // DELETE SHORT URL
 app.post("/urls/:shortURL/delete", (req, res) => {
+  //404 - Not Found
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -152,8 +124,10 @@ app.post("/urls/:shortURL", (req, res) => {
 //INITIATE SHORT URL TEMPLATE <==> urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.session.user_id;
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL].longURL;
   const user = users[id];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
+  const templateVars = { shortURL, longURL, user };
   res.render("urls_show", templateVars);
 });
 
@@ -167,7 +141,7 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // const userID = generateRandomString();
+  const userID = generateRandomString();
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
 
@@ -177,7 +151,7 @@ app.post('/register', (req, res) => {
   };
 
   // IS EMAIL IN USERS DATABASE
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     return res.status(400).send('Error: User already exists.');
   };
 
@@ -209,14 +183,16 @@ app.post('/login', (req, res) => {
     res.status(400).send("Invalid Login: Email or password cannot be left blank")
     return;
   }
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
+
   if(!user){
-    res.status(403).send("Error: User doesn't exist");
+    res.status(404).send("404 - Not Found");
   }
-  if (user.email !== email || (!bcrypt.compareSync(password, user.password))) {
+  console.log();
+  if ((!bcrypt.compareSync(password, user.password))) {
     res.status(401).send("Invalid login")
     return;
-  }
+  }// -------------------------------------------------------> change to refactored function 
   req.session.user_id = user.id;
   res.redirect('/urls');
 });
@@ -233,13 +209,13 @@ app.post('/logout', (req, res) => {
 //   res.status(404).send('Error'); // unhappy path
 // });
 
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 //   _.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 
 app.listen(PORT, () => {
-  console.log(`On PORT ${PORT}...`);
+  console.log(`On PORT >>------> ${PORT}`);
 });
