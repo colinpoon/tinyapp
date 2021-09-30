@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
+const { generateRandomString, getUserByEmail } = require('./helpers')
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
@@ -45,23 +46,31 @@ const users = {
 };
 
 // HELPER FUNCTIONS
-const generateRandomString = function () {
-  return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-};
+// const generateRandomString = function () {
+//   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
+// };
 
-const getUserByEmail = function (email) {
-  for (const userID in users) {
-    const user = users[userID];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-};
-//REFACTOR
-const getUserByEmail = function (email, database) {
-
-};
+// // const getUserByEmail = function (email) {
+// //   for (const userID in users) {
+// //     const user = users[userID];
+// //     if (user.email === email) {
+// //       return user;
+// //     }
+// //   }
+// //   return null;
+// // };
+// // //REFACTOR
+// const getUserByEmail = function (email, database) {
+//   let user = {};
+//   for (const key in database) {
+//     if (database[key]['email'] === email) {
+//       user = database[key].id
+//       return user;
+//     }
+//   }
+//   return null;
+// };
+// console.log('got -------------->', getUserByEmail('a@gmail.com', users))
 
 
 const urlsForUser = function(id) {
@@ -74,22 +83,6 @@ const urlsForUser = function(id) {
   console.log(output);
   return output;
 };
-
-
-//PASSWORD ENCRYPTION
-// const myPlaintextPassword = 's0/\/\P4$$w0rD';
-
-// bcrypt.genSalt(saltRounds, function(err, salt) {
-//   bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
-//       // Store hash in your password DB.
-//   });
-// });
-// //COMPARE HASHED PASSWORDS 
-// bcrypt.compare('buuzlightyear', hash, function(err, result) {
-//   // result == false
-// });
-
-
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
   
@@ -189,7 +182,7 @@ app.post('/register', (req, res) => {
   };
 
   // ADD USER TO DATABASE
-  const id = Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
+  const id = generateRandomString();
   users[id] = { id, email, password };
   req.session.user_id = id;
   res.redirect('/urls');
