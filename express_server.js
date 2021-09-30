@@ -80,6 +80,10 @@ app.get("/", (req, res) => {
 //INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
+  if (!id) {
+    res.redirect("/login");
+    return;
+  }
   const user = users[id];
   const templateVars = { user };
   res.render('urls_new', templateVars);
