@@ -85,7 +85,7 @@ app.get("/", (req, res) => {
 });
 
 //NEW
-//INITIATE NEW URLs <==> urls_new.ejs
+//INITIATE NEW URLs <==> urls_new.ejs ******
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
   if (!id) {
