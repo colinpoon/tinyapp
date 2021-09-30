@@ -53,22 +53,23 @@ const getUserByEmail = function (email) {
   return null;
 };
 
-const urlsForUser = function(id) {
-
-};
+// const urlsForUser = function(id) {
+ 
+// };
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
   
 
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
+/// ===========================>>> logic here has to change
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
   if (!userID) {
     res.status(403).send("Must be logged in to view");
     return;
   }
-  const user = users[id];
+  const user = users[userID];
   const templateVars = { user };
   res.render("urls_index", templateVars);
 });
@@ -98,11 +99,12 @@ app.get('/urls/new', (req, res) => {
 });
 
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
+/// ===========================>>> logic here has to change
 app.post("/urls", (req, res) => {
   // console.log(req.body);
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(longURL);
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = longURL; 
   // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
