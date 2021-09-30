@@ -47,6 +47,10 @@ const getUserByEmail = function (email) {
   return null;
 };
 
+const urlsForUser = function(id) {
+
+};
+
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
   
 
@@ -154,28 +158,42 @@ app.post('/register', (req, res) => {
   };
   // ADD USER TO DATABASE
   const id = Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-
   users[id] = { id, email, password };
-
   res.cookie("user_id", id);
   console.log("USER[ID] for new user >>------->>>", users[id]);
-  console.log(users);
+  // console.log(users);
 
   res.redirect('/urls');
 });
 
 // LOGIN
-//INITIATE PAGE-------------------------------------------here dealing with password authentication. Looking to see if user password matches password input. 
 app.get('/login', (req, res) => {
-  const user = req.cookies.user_id;
-  const templateVars = { user };
-  if (user) {
-    return res.redirect('/urls');
+  const id = req.cookies.user_id;
+  if (id) {
+    res.redirect("/urls");
+    return;
   }
+  let user = null;
+  for (const key in users) {
+    if (key === id) {
+      user = users[key];
+    }
+  }
+  const templateVars = { user };
   res.render('urls_login', templateVars);
 });
+
+
+
+
+
+
+
+
+
+
 //LOGIN
-//USER PATH
+//USER PATH ------------------------------------------- Looking to see if user password matches password input.
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -187,16 +205,13 @@ app.post('/login', (req, res) => {
   if(!user){
     res.status(403).send("Error: User doesn't exist");
   }
+  if (user.email !== email || user.password !== password){
+    return res.status(403).send("Invalid login");
+  }
   // console.log(user.password);
   res.cookie('user_id', user.id);
   res.redirect('/urls');
 });
-
-
-
-
-
-
 
 // LOGOUT
 // RENDER LOGOUT BUTTON IF USER
