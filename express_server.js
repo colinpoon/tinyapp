@@ -58,6 +58,11 @@ const getUserByEmail = function (email) {
   }
   return null;
 };
+//REFACTOR
+const getUserByEmail = function (email, database) {
+
+};
+
 
 const urlsForUser = function(id) {
   let output = {};
@@ -169,26 +174,24 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
+  // const userID = generateRandomString();
   const email = req.body.email;
-  // console.log(email);
-  const password = req.body.password;
-  // console.log(password);
+  const password = bcrypt.hashSync(req.body.password, 10);
+
   //CHECK IF INPUT FIELDS ARE BLANK
   if (!email || !password) {
     return res.status(400).send("Invalid Registration: Email or password cannot be left blank.");
   };
+
   // IS EMAIL IN USERS DATABASE
-  // const user = getUserByEmail(email);
   if (getUserByEmail(email)) {
     return res.status(400).send('Error: User already exists.');
   };
+
   // ADD USER TO DATABASE
   const id = Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
   users[id] = { id, email, password };
-  res.cookie("user_id", id);
-  //------------------------------------------>> broken here? 
-  console.log("USER[ID] for new user >>------->>>", users[id]);
-  // console.log(users);
+  req.session.user_id = id;
   res.redirect('/urls');
 });
 
@@ -204,10 +207,8 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars);
 });
 
-
-
 //LOGIN
-//USER PATH ------------------------------------------- Looking to see if user password matches password input.
+//USER PATH 
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -219,8 +220,9 @@ app.post('/login', (req, res) => {
   if(!user){
     res.status(403).send("Error: User doesn't exist");
   }
-  if (user.email !== email || user.password !== password){ //----->bcrypt
-    return res.status(403).send("Invalid login");
+  if (user.email !== email || (!bcrypt.compareSync(password, user.password))) {
+    res.status(401).send("Invalid login")
+    return;
   }
   req.session.user_id = user.id;
   res.redirect('/urls');
@@ -229,12 +231,9 @@ app.post('/login', (req, res) => {
 // LOGOUT
 // RENDER LOGOUT BUTTON IF USER
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
-
-
-
 
 // // DEFAULT // CATCH - ALL ERRORS
 // app.get ('*', (req, res) => {
