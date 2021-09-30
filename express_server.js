@@ -53,28 +53,45 @@ const getUserByEmail = function (email) {
   return null;
 };
 
-// const urlsForUser = function(id) {
- 
-// };
+//Create urlsForUser(id) which returns the URLs where the userID is equal to the id of the currently logged-in user.
 
+// const urlDatabase = {
+//   b6UTxQ: { // shortURL
+//       longURL: "https://www.tsn.ca",
+//       userID: "a"
+//   }
+// }
+
+
+const urlsForUser = function(id) {
+  let output = {};
+  for (const url in urlDatabase){
+    if (urlDatabase[url].userID === id) {
+      output.url = {
+        longURL: urlDatabase[url].longURL,
+        userID: urlDatabase[url].userID
+      }
+    }
+  }
+
+  return output;
+};
+console.log(urlsForUser('a'));
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
   
 
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
-/// ===========================>>> logic here has to change
 app.get('/urls', (req, res) => {
-  const userID = req.cookies.user_id;
-  if (!userID) {
-    res.status(403).send("Must be logged in to view");
-    return;
-  }
-  const user = users[userID];
-  const templateVars = { user };
+  // console.log(urlDatabase);
+  // console.log(urlDatabase.b2xVn2);
+  // console.log(urlDatabase['b2xVn2']);
+  const id = req.cookies.user_id;
+  // console.log(id);
+  const user = users[id];
+  const templateVars = { urls: urlDatabase, user};
   res.render("urls_index", templateVars);
 });
-
-
 
 app.get("/", (req, res) => {
   const user = req.cookies.user_id;
@@ -86,7 +103,7 @@ app.get("/", (req, res) => {
 });
 
 //NEW
-//INITIATE NEW URLs <==> urls_new.ejs ******
+//INITIATE NEW URLs <==> urls_new.ejs
 app.get('/urls/new', (req, res) => {
   const id = req.cookies.user_id;
   if (!id) {
@@ -99,12 +116,11 @@ app.get('/urls/new', (req, res) => {
 });
 
 // CREATE NEW TINY URL - REDIRECT /urls_new <==> /urls
-/// ===========================>>> logic here has to change
 app.post("/urls", (req, res) => {
   // console.log(req.body);
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(longURL);
-  urlDatabase[shortURL] = longURL; 
+  urlDatabase[shortURL] = longURL;
   // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
