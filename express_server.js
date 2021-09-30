@@ -222,8 +222,7 @@ app.post('/login', (req, res) => {
   if (user.email !== email || user.password !== password){ //----->bcrypt
     return res.status(403).send("Invalid login");
   }
-  // console.log(user.password);
-  res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
   res.redirect('/urls');
 });
 
@@ -234,9 +233,6 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-
-//new cookie ---------*****
-req.session.user_id
 
 
 
