@@ -15,8 +15,14 @@ app.use(cookieParser());
 
 //  DATABASES
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+    b6UTxQ: { // shortURL
+        longURL: "https://www.tsn.ca",
+        userID: "a"
+    },
+    i3BoGr: {
+        longURL: "https://www.google.ca",
+        userID: "a"
+    }
 };
 
 const users = {
@@ -57,15 +63,17 @@ const urlsForUser = function(id) {
 // HOME
 // INITIATE /URLS <==> urls_index.ejs
 app.get('/urls', (req, res) => {
-  // console.log(urlDatabase);
-  // console.log(urlDatabase.b2xVn2);
-  // console.log(urlDatabase['b2xVn2']);
-  const id = req.cookies.user_id;
-  // console.log(id);
+  const userID = req.cookies.user_id;
+  if (!userID) {
+    res.status(403).send("Must be logged in to view");
+    return;
+  }
   const user = users[id];
-  const templateVars = { urls: urlDatabase, user};
+  const templateVars = { user };
   res.render("urls_index", templateVars);
 });
+
+
 
 app.get("/", (req, res) => {
   const user = req.cookies.user_id;
