@@ -117,14 +117,23 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+
 //SHOW
 //INITIATE SHORT URL TEMPLATE <
 app.get("/urls/:shortURL", (req, res) => {
+  let ts = Date.now();
+
+let date_ob = new Date(ts);
+let date = date_ob.getDate();
+let month = date_ob.getMonth() + 1;
+let year = date_ob.getFullYear();
+let postDate = (year + "." + month + "." + date);
+
   const id = req.session.user_id;
   const shortURL = req.params.shortURL
   const longURL = urlDatabase[shortURL].longURL;
   const user = users[id];
-  const templateVars = { shortURL, longURL, user };
+  const templateVars = { shortURL, longURL, user, postDate };
   res.render("urls_show", templateVars);
 });
 
