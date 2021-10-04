@@ -55,7 +55,7 @@ const urlsForUser = function(id) {
   }
   return output;
 };
-
+console.log('urls for users ===', urlsForUser('a'));
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 
 // HOME
@@ -113,7 +113,12 @@ app.post("/urls", (req, res) => {
 
 // REDIRECT LONG URL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = req.params.shortURL;
+  const urlData = urlDatabase[shortURL]
+  const longURL = urlDatabase[shortURL].longURL;
+  if (!longURL) { //=========================================== here?
+    res.status(400).send('URL not found')
+  }
   res.redirect(longURL);
 });
 
@@ -143,10 +148,24 @@ app.get("/urls/:shortURL", (req, res) => {
   let month = dateObj.getMonth() + 1;
   let year = dateObj.getFullYear();
   let postDate = (date + "." + month + "." + year);
+  ///// Stretch Attempt ^^^^
   const id = req.session.user_id;
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   const user = users[id];
+  const urlData = urlDatabase[shortURL];
+  if (!urlsForUser(id).userID === id) {
+    return res.send('Must be logged in');
+  }
+  if (!id) {
+    return res.send('Must be logged in');
+  }
+  if (!urlData) { //=========================================== here?
+    return res.status(400).send("URL Unavailable");
+  }
+  if (urlData.userID !== id) {
+    return res.send('Must be logged in');
+  }
   const templateVars = { shortURL, longURL, user, postDate };
   res.render("urls_show", templateVars);
 });
