@@ -77,6 +77,11 @@ app.get('/urls', (req, res) => {
 });
 //  ROOT REDIRECT
 app.get("/", (req, res) => {
+  const userID = req.session.user_id;
+  if (!userID) {
+    res.redirect("/login");
+    return;
+  }
   res.redirect("/urls");
 });
 
