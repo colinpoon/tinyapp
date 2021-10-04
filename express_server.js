@@ -55,7 +55,6 @@ const urlsForUser = function(id) {
   }
   return output;
 };
-console.log('urls for users ===', urlsForUser('a'));
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
 
 // HOME
@@ -64,13 +63,14 @@ app.get('/urls', (req, res) => {
     res.redirect("/login");
     return;
   };
+  // STRETCH ATTEMPT
   let ts = Date.now();
   let dateObj = new Date(ts);
   let date = dateObj.getDate();
   let month = dateObj.getMonth() + 1;
   let year = dateObj.getFullYear();
   let postDate = (date + "." + month + "." + year);
-
+  //
   const user = req.session.user_id;
   const templateVars = { urls: urlsForUser(user), user: users[user], postDate };
   res.render("urls_index", templateVars);
@@ -107,7 +107,7 @@ app.post("/urls", (req, res) => {
     return;
   }
   const shortURL = generateRandomString(longURL);
-  urlDatabase[shortURL] = { longURL: longURL, userID };
+  urlDatabase[shortURL] = { longURL: longURL, userID: userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -115,9 +115,9 @@ app.post("/urls", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const urlData = urlDatabase[shortURL]
-  const longURL = urlDatabase[shortURL].longURL;
-  if (!longURL) { //=========================================== here?
-    res.status(400).send('URL not found')
+  const longURL = urlDatabase[shortURL];
+  if (!longURL) { 
+    res.status(404).send('URL not found')
   }
   res.redirect(longURL);
 });
@@ -142,16 +142,20 @@ app.post("/urls/:shortURL", (req, res) => {
 //SHOW
 //INITIATE SHORT URL TEMPLATE <
 app.get("/urls/:shortURL", (req, res) => {
+  // Stretch Attempt
   let ts = Date.now();
   let dateObj = new Date(ts);
   let date = dateObj.getDate();
   let month = dateObj.getMonth() + 1;
   let year = dateObj.getFullYear();
   let postDate = (date + "." + month + "." + year);
-  ///// Stretch Attempt ^^^^
+  ///// Seems to only save the date NOW and doesnt commit it to memmory. More research
   const id = req.session.user_id;
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
+  const longURL = urlDatabase[shortURL];
+  if (!longURL) {
+    return res.status(404).send('URL unavailable') ;
+  }
   const user = users[id];
   const urlData = urlDatabase[shortURL];
   if (!urlsForUser(id).userID === id) {
@@ -160,7 +164,7 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!id) {
     return res.send('Must be logged in');
   }
-  if (!urlData) { //=========================================== here?
+  if (!urlData) { 
     return res.status(400).send("URL Unavailable");
   }
   if (urlData.userID !== id) {
@@ -169,7 +173,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL, longURL, user, postDate };
   res.render("urls_show", templateVars);
 });
-
 
 // REGISTER
 //INITIATE REGISTRATION
