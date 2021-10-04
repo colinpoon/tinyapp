@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
-const { generateRandomString, getUserByEmail } = require('./helpers')
+const { generateRandomString, getUserByEmail } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
@@ -17,19 +17,19 @@ app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
-}))
+}));
 
 
 //  DATABASES
 const urlDatabase = {
-    b6UTxQ: { // shortURL
-        longURL: "https://www.tsn.ca",
-        userID: "a"
-    },
-    i3BoGr: {
-        longURL: "https://www.google.ca",
-        userID: "a"
-    }
+  b6UTxQ: { // shortURL
+    longURL: "https://www.tsn.ca",
+    userID: "a"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "a"
+  }
 };
 
 const users = {
@@ -49,7 +49,7 @@ const users = {
 const urlsForUser = function(id) {
   let output = {};
   for (const [key, value] of Object.entries(urlDatabase)) {
-    if(id === value.userID) {
+    if (id === value.userID) {
       output[key] = value.longURL;
     }
   }
@@ -57,16 +57,22 @@ const urlsForUser = function(id) {
 };
 
 //_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(_.~"(
-  
+
 // HOME
 app.get('/urls', (req, res) => {
   if (!req.session.user_id) {
     res.redirect("/login");
     return;
-  }
+  };
+  let ts = Date.now();
+  let dateObj = new Date(ts);
+  let date = dateObj.getDate();
+  let month = dateObj.getMonth() + 1;
+  let year = dateObj.getFullYear();
+  let postDate = (date + "." + month + "." + year);
+
   const user = req.session.user_id;
-  console.log("user_id", user);
-  const templateVars = { urls: urlsForUser(user), user: users[user] };
+  const templateVars = { urls: urlsForUser(user), user: users[user], postDate };
   res.render("urls_index", templateVars);
 });
 //  ROOT REDIRECT
@@ -90,8 +96,13 @@ app.get('/urls/new', (req, res) => {
 // CREATE NEW TINY URL <-- USER POST
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
+  const userID = req.session.user_id;
+  if (!userID) {
+    res.redirect("/login");
+    return;
+  }
   const shortURL = generateRandomString(longURL);
-  urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
+  urlDatabase[shortURL] = { longURL: longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -122,15 +133,13 @@ app.post("/urls/:shortURL", (req, res) => {
 //INITIATE SHORT URL TEMPLATE <
 app.get("/urls/:shortURL", (req, res) => {
   let ts = Date.now();
-
-let date_ob = new Date(ts);
-let date = date_ob.getDate();
-let month = date_ob.getMonth() + 1;
-let year = date_ob.getFullYear();
-let postDate = (year + "." + month + "." + date);
-
+  let dateObj = new Date(ts);
+  let date = dateObj.getDate();
+  let month = dateObj.getMonth() + 1;
+  let year = dateObj.getFullYear();
+  let postDate = (date + "." + month + "." + year);
   const id = req.session.user_id;
-  const shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   const user = users[id];
   const templateVars = { shortURL, longURL, user, postDate };
@@ -154,12 +163,12 @@ app.post('/register', (req, res) => {
   //CHECK IF INPUT FIELDS ARE BLANK
   if (!email || !password) {
     return res.status(400).send("Invalid Registration: Email or password cannot be left blank.");
-  };
+  }
 
   // IS EMAIL IN USERS DATABASE
   if (getUserByEmail(email, users)) {
     return res.status(400).send('Error: User already exists.');
-  };
+  }
 
   // ADD USER TO DATABASE
   const id = generateRandomString();
@@ -181,21 +190,21 @@ app.get('/login', (req, res) => {
 });
 
 //LOGIN
-//USER PATH 
+//USER PATH
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
-    res.status(400).send("Invalid Login: Email or password cannot be left blank")
+    res.status(400).send("Invalid Login: Email or password cannot be left blank");
     return;
   }
   const user = getUserByEmail(email, users);
 
-  if(!user){
+  if (!user) {
     res.status(404).send("404 - Not Found");
   }
   if ((!bcrypt.compareSync(password, user.password))) {
-    res.status(401).send("Invalid login")
+    res.status(401).send("Invalid login");
     return;
   }
   req.session.user_id = user.id;
@@ -208,11 +217,6 @@ app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
-
-// // DEFAULT // CATCH - ALL ERRORS
-// app.get ('*', (req, res) => {
-//   res.status(404).send('Error'); // unhappy path
-// });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);

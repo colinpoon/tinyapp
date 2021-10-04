@@ -23,6 +23,7 @@
         <tr>
           <th scope="col"> Short URL </th>
           <th scope="col"> Long URL </th>
+          <th scope="col"> Date Posted </th>
           <th scope="col"> Edit </th>
           <th scope="col"> Delete </th>
         </tr>
@@ -35,6 +36,9 @@
             </td>
             <td>
               <a href="<%= urls[url] %>" class="link-success"><%= urls[url] %></a>
+            </td>
+            <td>
+              <p class="card-text" style="color: #6e757c"><%= postDate %></p>
             </td>
             <td>
               <form method="GET" action="/urls/<%= url %>/">
