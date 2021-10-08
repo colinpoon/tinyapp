@@ -127,7 +127,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const id = req.session.user_id;
   const url = urlDatabase[shortURL];
   const user = users['id'];
-
   if (!user){
       return res.status(404).send('user does not exist, register first');
   }
