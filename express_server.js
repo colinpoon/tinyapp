@@ -45,7 +45,6 @@ const users = {
   }
 };
 
-// HELPER FUNCTIONS
 const urlsForUser = function(id) {
   let output = {};
   for (const [key, value] of Object.entries(urlDatabase)) {
@@ -125,11 +124,18 @@ app.get("/u/:shortURL", (req, res) => {
 // DELETE SHORT URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  const userID = urlDatabase[shortURL]['userID']
   const id = req.session.user_id;
-  if (id !== userID) {
-    res.redirect("/login");
-    return;
+  const url = urlDatabase[shortURL];
+  const user = users['id'];
+
+  if (!user){
+      return res.status(404).send('user does not exist, register first');
+  }
+  if (!url) {
+    return res.status(404).send("This URL doesn't exist");
+  }
+  if (url.user_id !== id) {
+    return res.status(404).send("You do not own this URL");
   }
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -139,6 +145,19 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
+  const id = req.session.user_id;
+  const url = urlDatabase[shortURL];
+  const user = users['id'];
+  if (!user){
+      return res.status(404).send('user does not exist, register first');
+  }
+  if (!url) {
+    return res.status(404).send("This URL doesn't exist");
+  }
+  if (url.user_id !== id) {
+    return res.status(404).send("You do not own this URL");
+  }
+
   urlDatabase[shortURL].longURL = longURL;
   res.redirect("/urls");
 });
@@ -157,14 +176,15 @@ app.get("/urls/:shortURL", (req, res) => {
   ///// Seems to only save the date NOW and doesnt commit it to memmory. More research
   const id = req.session.user_id;
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]["longURL"];
+  const longURL = urlDatabase[shortURL].longURL;
+  const url = urlDatabase[shortURL];
   if (!longURL) {
     return res.status(404).send('URL unavailable') ;
   }
   const user = users[id];
   const urlData = urlDatabase[shortURL];
   if (!urlsForUser(id).userID === id) {
-    return res.send('Must be logged in');
+    return res.send('You do not own this URL');
   }
   if (!id) {
     return res.send('Must be logged in');
@@ -173,7 +193,7 @@ app.get("/urls/:shortURL", (req, res) => {
     return res.status(400).send("URL Unavailable");
   }
   if (urlData.userID !== id) {
-    return res.send('Must be logged in');
+    return res.send('You do not own this URL');
   }
   const templateVars = { shortURL, longURL, user, postDate };
   res.render("urls_show", templateVars);
@@ -188,21 +208,18 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  const userID = generateRandomString();
   const email = req.body.email;
-  const password = bcrypt.hashSync(req.body.password, 10);
-
+  let password = req.body.password
   //CHECK IF INPUT FIELDS ARE BLANK
   if (!email || !password) {
     return res.status(400).send("Invalid Registration: Email or password cannot be left blank.");
   }
-
   // IS EMAIL IN USERS DATABASE
   if (getUserByEmail(email, users)) {
     return res.status(400).send('Error: User already exists.');
   }
-
   // ADD USER TO DATABASE
+  password = bcrypt.hashSync(req.body.password, 10);
   const id = generateRandomString();
   users[id] = { id, email, password };
   req.session.user_id = id;
@@ -227,7 +244,7 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
-    res.status(400).send("Invalid Login: Email or password cannot be left blank");
+    res.status(400).send("Invalid Login");
     return;
   }
   const user = getUserByEmail(email, users);
