@@ -124,8 +124,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 // DELETE SHORT URL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  //404 - Not Found
   const shortURL = req.params.shortURL;
+  const userID = urlDatabase[shortURL]['userID']
+  const id = req.session.user_id;
+  if (id !== userID) {
+    res.redirect("/login");
+    return;
+  }
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
@@ -152,7 +157,7 @@ app.get("/urls/:shortURL", (req, res) => {
   ///// Seems to only save the date NOW and doesnt commit it to memmory. More research
   const id = req.session.user_id;
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL]["longURL"];
   if (!longURL) {
     return res.status(404).send('URL unavailable') ;
   }
