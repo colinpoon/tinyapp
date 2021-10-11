@@ -97,10 +97,11 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-// CREATE NEW TINY URL <-- USER POST
+// CREATE NEW TINY URL <-- USER POST //// 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const userID = req.session.user_id;
+
   if (!userID) {
     res.redirect("/login");
     return;
@@ -110,11 +111,11 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// REDIRECT LONG URL
+// REDIRECT LONG URL ------------ > Not linking
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const urlData = urlDatabase[shortURL]
-  const longURL = urlDatabase[shortURL];
+  const urlData = urlDatabase[shortURL];
+  const longURL = urlData.longURL;
   if (!longURL) { 
     res.status(404).send('URL not found')
   }
@@ -126,34 +127,34 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   const id = req.session.user_id;
   const url = urlDatabase[shortURL];
-  const user = users['id'];
+  const user = users[id];
   if (!user){
       return res.status(404).send('user does not exist, register first');
   }
   if (!url) {
     return res.status(404).send("This URL doesn't exist");
   }
-  if (url.user_id !== id) {
+  if (url.userID !== id) {
     return res.status(404).send("You do not own this URL");
   }
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
-// EDIT URL
+// EDIT URL -------****
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   const id = req.session.user_id;
   const url = urlDatabase[shortURL];
-  const user = users['id'];
+  const user = users[id];
   if (!user){
       return res.status(404).send('user does not exist, register first');
   }
   if (!url) {
     return res.status(404).send("This URL doesn't exist");
   }
-  if (url.user_id !== id) {
+  if (url.userID !== id) {
     return res.status(404).send("You do not own this URL");
   }
   urlDatabase[shortURL].longURL = longURL;
